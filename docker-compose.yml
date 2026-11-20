@@ -1,0 +1,49 @@
+# Nama project dikunci supaya nama volume selalu `kostkita_db` & `kostkita_uploads`
+# (dipakai di perintah backup pada DEPLOY.md), apa pun nama foldernya.
+name: kostkita
+
+services:
+  web:
+    build: .
+    container_name: kostkita-web
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DB_HOST: db
+      DB_USER: kostkita
+      DB_PASS: ${DB_PASSWORD:-kostkita_pass}
+      DB_NAME: koskita3
+    ports:
+      # Default hanya bisa diakses dari server itu sendiri (aman untuk dipasang di belakang reverse proxy).
+      # Untuk akses langsung dari luar, set BIND_ADDR=0.0.0.0 di file .env
+      - "${BIND_ADDR:-127.0.0.1}:${APP_PORT:-8090}:80"
+    volumes:
+      # Foto kost hasil upload tetap ada walau container dibuat ulang.
+      # Pertama kali dibuat, volume ini otomatis terisi foto bawaan dari image.
+      - uploads:/var/www/html/assets/img
+
+  db:
+    image: mysql:8.0
+    container_name: kostkita-db
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-root_pass_ganti_ini}
+      MYSQL_DATABASE: koskita3
+      MYSQL_USER: kostkita
+      MYSQL_PASSWORD: ${DB_PASSWORD:-kostkita_pass}
+    volumes:
+      - db:/var/lib/mysql
+      # Dijalankan OTOMATIS hanya saat volume DB masih kosong (deploy pertama)
+      - ./db/koskita3.sql:/docker-entrypoint-initdb.d/01-koskita3.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -uroot -p$$MYSQL_ROOT_PASSWORD --silent"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    # DB sengaja TIDAK di-publish ke host; hanya bisa diakses container `web`.
+
+volumes:
+  db:
+  uploads:

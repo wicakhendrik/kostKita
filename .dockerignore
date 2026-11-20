@@ -1,0 +1,9 @@
+.git
+.claude
+.env
+docs
+db
+template_admin
+*.md
+Dockerfile
+docker-compose.yml
