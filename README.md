@@ -48,7 +48,7 @@ Cari kost, lihat fasilitas & harga, lalu pesan — pemilik kost bisa mempromosik
 </tr>
 <tr>
 <td><b>Form tambah kost (pemilik)</b><br><img src="docs/screenshots/13-pemilik-form-tambah-kost.png"></td>
-<td><b>Halaman About Us</b><br><img src="docs/screenshots/04-about.png"></td>
+<td></td>
 </tr>
 </table>
 
